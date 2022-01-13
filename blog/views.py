@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.core.mail import send_mail
 from .models import Messages
 
@@ -6,22 +7,18 @@ from .models import Messages
 # Create your views here.
 
 def index(request):
-    message = "send message"
-    context = {
-        'message': message
-    }
+    context = {}
     if request.method =='POST' :
-        message = "thanks "+ request.POST['name'] + "  , message sent successfully"
-        Messages.objects.create(
-            name = request.POST['name'],
-            email = request.POST['email'],
-            subject = request.POST['subject'],
-            message = request.POST['message']
-        )
-        context['message'] = message
-        print(message)
-        return render(request, 'blog/blog.html', context)
-
-    print(context['message'])
-
-    return render(request, 'blog/blog.html', context)
+        try:
+            Messages.objects.create(
+                name = request.POST['name'],
+                email = request.POST['email'],
+                subject = request.POST['subject'],
+                message = request.POST['message']
+            )
+            messages.success(request, "thanks " + request.POST['name'] + "  , message sent successfully")
+        except:
+            messages.error(request, f"sorry {request.POST['name']}, internal server error please try again")
+        print(messages)
+        return redirect('/#contact')
+    return render(request, 'blog/index.html', context)
